@@ -1,0 +1,45 @@
+Inputs (required as data source):
+
+Hourly measurements (january to april) of advanced meters. CSV files (121). Source: ENEL:
+data/recent_measurements/{csv_file}
+
+Monthly consumption (2023) for consumers with advanced meters. CSV file. Source: ENEL:
+data/complementary/Base_SM.csv
+
+BDGD data (shapefiles) (for 2023) with data for consumption for all consumers in ENEL. Source: ENEL:
+data/UCBT/{shapefile}
+
+Census data for SP (2010):
+data/sp_setores_censitarios_2010/35SEE250GC_SIR.shp
+data/SP_Capital_20231030/Base informaçoes setores2010 universo SP_Capital/CSV/DomicilioRenda_SP1_adj.csv
+data/SP_Exceto_Capital_20231030/Base informaçoes setores2010 universo SP_Exceto_Capital/CSV/DomicilioRenda_SP2_adj.csv
+
+Atypical consumers for ENEL SP (low income, home care, distributed generation, and so on)
+data/complementary/atipicos.xlsx
+
+
+
+Outputs (directories structure required for intermediary and final outputs). Make sure the following, empty directories, exist:
+
+Meters to integers and integers to meters dictionaries (for HDF5 reference):
+Origin -> hdf5_mappings.py
+data/misc/
+
+Hourly measurements clean:
+Origin -> clean_csv_data.py
+data/recent_measurements_clean/
+
+HDF5, memory efficient data:
+data/hdf5
+
+Consolidated consumption data:
+Origin -> data_consolidation.py
+data/consolidated/
+
+Samples results:
+Origin -> sample_selection.py
+data/samples/
+
+
+
+
