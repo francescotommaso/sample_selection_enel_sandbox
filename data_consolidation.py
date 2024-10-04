@@ -266,118 +266,6 @@ def filter_atypical():
     df_filtered.to_csv('data/consolidated/consumption_data_with_sector_and_income_atypical_filtered.csv', index=False)
 
 
-def plot_bivariate_analysis():
-
-    # Map dimensions
-    map_width = 1786
-    map_height = 1495
-    top_lat = -23.3520
-    bottom_lat = -23.8208
-    left_long = -46.9755
-    right_long = -46.3630
-
-    # Pixel coordinates
-    x1, y1 = 457, 132  # Upper left
-    x2, y2 = 1076, 541  # Bottom right
-
-    # Convert to geographic coordinates
-    lat_top, lat_bottom, long_left, long_right = pixel_to_geo(map_width, map_height, top_lat, bottom_lat, left_long, right_long, x1, y1, x2, y2)
-
-    # Load the DataFrame
-    df = pd.read_csv('data/consolidated/consumption_data_with_sector_and_income.csv',
-                     dtype={'COD_ID': str, 'SECTOR': str})
-
-    # Initial row count
-    initial_row_count = len(df)
-
-    # Drop rows where INCOME is 0 or higher than 16400
-    df = df[(df['INCOME'] > 0) & (df['INCOME'] <= 16400)]
-    after_income_filter_row_count = len(df)
-
-    # Define the columns corresponding to ENE_XX
-    ene_columns = [f'ENE_{str(i).zfill(2)}' for i in range(1, 13)]
-
-    # Drop rows where any ENE_XX column is 0 before removing outliers
-    df = df[(df[ene_columns] > 0).all(axis=1)]
-    after_zero_filter_row_count = len(df)
-
-    # Apply IQR filtering and calculate the average only for rows where all 12 values are valid after IQR filtering
-    df['average_consumption'] = df[ene_columns].apply(calculate_average_ene, axis=1)
-
-    # Drop rows where the average consumption could not be calculated
-    df = df.dropna(subset=['average_consumption'])
-    after_outlier_removal_row_count = len(df)
-
-    df = df[df['average_consumption'] <= 1000]
-    after_large_consumption_removal_row_count = len(df)
-
-    # Subset 1: Only rows where ami == 1
-    df_ami = df[df['AMI'] == 1]
-    ami_row_count = len(df_ami)
-
-    # Subset 2: All rows (without any exceptions)
-    df_all = df
-    all_row_count = len(df_all)
-
-    # Subset 3: Filtered by AMI == 1 and within the geographic bounding box
-    df_geo = df_ami[
-        (df_ami['LAT'] <= lat_top) & 
-        (df_ami['LAT'] >= lat_bottom) & 
-        (df_ami['LONG'] >= long_left) & 
-        (df_ami['LONG'] <= long_right)
-    ]
-    geo_row_count = len(df_geo)
-
-    # Determine the common x and y axis limits
-    x_min = min(df['average_consumption'].min(), df_ami['average_consumption'].min(), df_geo['average_consumption'].min())
-    x_max = max(df['average_consumption'].max(), df_ami['average_consumption'].max(), df_geo['average_consumption'].max())
-    y_min = min(df['INCOME'].min(), df_ami['INCOME'].min(), df_geo['INCOME'].min())
-    y_max = max(df['INCOME'].max(), df_ami['INCOME'].max(), df_geo['INCOME'].max())
-
-    # Print the counts of rows dropped and used
-    print(f"Initial rows: {initial_row_count}")
-    print(f"Rows after income filter: {after_income_filter_row_count} (Dropped: {initial_row_count - after_income_filter_row_count})")
-    print(f"Rows after zero filter: {after_zero_filter_row_count} (Dropped: {after_income_filter_row_count - after_zero_filter_row_count})")
-    print(f"Rows after outlier removal: {after_outlier_removal_row_count} (Dropped: {after_zero_filter_row_count - after_outlier_removal_row_count})")
-    print(f"Rows after outlier removal: {after_large_consumption_removal_row_count} (Dropped: {after_outlier_removal_row_count - after_large_consumption_removal_row_count})")
-    print(f"Rows used for AMI == 1 chart: {ami_row_count}")
-    print(f"Rows used for all rows chart: {all_row_count}")
-    print(f"Rows used for geographic filter chart: {geo_row_count}")
-
-    # Plotting the bivariate distribution histograms
-    plt.figure(figsize=(21, 6))
-
-    # Plot for ami == 1
-    ax1 = plt.subplot(1, 3, 1)
-    sns.histplot(x='average_consumption', y='INCOME', data=df_ami, bins=30, pthresh=0.0001, cmap="magma")
-    ax1.set_title(f'Com AMI (UCs: {ami_row_count})')
-    ax1.set_xlabel('Consumo Médio (kWh/mês)')
-    ax1.set_ylabel('Rendimento Mensal Nominal (2010)')
-    ax1.set_xlim(x_min, x_max)
-    ax1.set_ylim(y_min, y_max)
-
-    # Plot for all rows
-    ax2 = plt.subplot(1, 3, 2)
-    sns.histplot(x='average_consumption', y='INCOME', data=df_all, bins=30, pthresh=0.0001, cmap="magma")
-    ax2.set_title(f'Todas UCs (UCs: {all_row_count})')
-    ax2.set_xlabel('Consumo Médio (kWh/mês)')
-    ax2.set_ylabel('Rendimento Mensal Nominal (2010)')
-    ax2.set_xlim(x_min, x_max)
-    ax2.set_ylim(y_min, y_max)
-
-    # Plot for geographic filter
-    ax3 = plt.subplot(1, 3, 3)
-    sns.histplot(x='average_consumption', y='INCOME', data=df_geo, bins=30, pthresh=0.0001, cmap="magma")
-    ax3.set_title(f'Com AMI na Região Norte (UCs: {geo_row_count})')
-    ax3.set_xlabel('Consumo Médio (kWh/mês)')
-    ax3.set_ylabel('Income')
-    ax3.set_xlim(x_min, x_max)
-    ax3.set_ylim(y_min, y_max)
-
-    plt.tight_layout()
-    plt.show()
-
-
 def check_outliers(sublist, idx, rows_to_drop):
     Q1 = np.percentile(sublist, 25)
     Q3 = np.percentile(sublist, 75)
@@ -888,6 +776,32 @@ def add_avg_energy():
 
     df.to_csv('data/consolidated/enel_march_income_iicc_ene.csv', index=False)
 
+
+def create_north_area_consolidated_df():
+    df = pd.read_csv('data/consolidated/enel_march_income_iicc_ene.csv',
+                 dtype={'A_instalacao': str, 'serialnumber': str, 'B_instalacao': str, 'SECTOR': str})
+    
+    north_coordinates_data = json.load(open('data/misc/north_area_coordinates.json', 'r'))
+
+    lat_top = north_coordinates_data["lat_top"]
+    lat_bottom = north_coordinates_data["lat_bottom"]
+    long_left = north_coordinates_data["long_left"]
+    long_right = north_coordinates_data["long_right"]
+
+    # Filter the DataFrame based on the bounding box coordinates
+    df_north = df[
+        (df['local_y'] <= lat_top) & 
+        (df['local_y'] >= lat_bottom) &
+        (df['local_x'] >= long_left) & 
+        (df['local_x'] <= long_right)
+    ]
+
+    # print(len(df))
+    # print(len(df_north))
+
+    df_north.to_csv('data/consolidated/enel_north_march_income_iicc_ene.csv', index=False)
+    
+
 ##########################################################################################################################
 ##########################################################################################################################
 
@@ -904,6 +818,8 @@ create_clean_enel_df()
 add_iicc_to_clean_enel_df()
 
 add_avg_energy()
+
+create_north_area_consolidated_df()
 
 generate_meter_code_installation_dict()
 

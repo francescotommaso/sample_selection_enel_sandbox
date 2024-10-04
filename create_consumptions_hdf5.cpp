@@ -22,10 +22,10 @@ int main() {
         auto start_time_total = std::chrono::high_resolution_clock::now();
 
         // Open the HDF5 file for reading
-        H5::H5File file("data/measurements.hdf5", H5F_ACC_RDONLY);
+        H5::H5File file("data/hdf5/measurements.hdf5", H5F_ACC_RDONLY);
 
         // Create a new HDF5 file for writing
-        H5::H5File new_file("data/consumption_data.hdf5", H5F_ACC_TRUNC);
+        H5::H5File new_file("data/hdf5/consumption_data.hdf5", H5F_ACC_TRUNC);
 
         // Get the root group
         H5::Group rootGroup = file.openGroup("/");

@@ -10,11 +10,11 @@
 #include <cstring>
 
 
-// to compile:
+// to compile on Linux:
 // g++ -o csv_to_hdf5 csv_to_hdf5.cpp -I/usr/include/hdf5/serial/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5_cpp -lhdf5 -std=c++11
 
 const std::string INPUT_DIR = "data/recent_measurements_clean";
-const std::string OUTPUT_FILE = "data/hdf5/output.hdf5";
+const std::string OUTPUT_FILE = "data/hdf5/measurements.hdf5";
 const int ARRAY_SIZE = 121 * 24; // 121 days of hourly data
 
 int calculateIndex(const std::string& timestamp) {

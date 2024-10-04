@@ -52,7 +52,9 @@ Compile create_consumptions_hdf5.cpp following the steps above (item 4) and run.
 
 6. Base ENEL SP data consolidation:
 What is does:
-Consolidates several data sources into one single file called "enel_march_income_iicc_ene.csv", which has data for average income, iicc (for march) and average energy consumption. It deals with data gaps and errors as well.
+Consolidates several data sources into one single file called "enel_north_march_income_iicc_ene.csv", 
+which has data for the consumers on the north of ENEL, with average income, iicc (for march) and average energy consumption. 
+It deals with data gaps and errors as well.
 How to run:
 data_consolidation.py
 
@@ -64,11 +66,10 @@ How to run:
 sample_selection.py
 
 
-
-
-
-
-
-
-
-
+8. Samples are split in groups, 1 to 5. There is also the merged sample, by strata:
+Group 1 - Control group (100 in each strata)
+Group 2 - Peak Time Rebate (170 in each strata)
+Group 3 - Peak Time Rebate + Smart Appliance (170 in each strata)
+Group 4 - Trinomial Time of Use (280 in each strata)
+Group 5 - Trinomial Time of Use + Peak Time Rebate (280 in each strata)
+Merged - 1000 in each strata
