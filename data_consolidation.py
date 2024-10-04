@@ -348,11 +348,6 @@ def generate_meter_code_installation_dict():
         except:
             failures_count_2 += 1     
 
-    # print(index_to_installation_dict)
-    # print(failures_count_0)
-    # print(failures_count_1)
-    # print(failures_count_2)
-
     with open('data/misc/index_to_installation.json', 'w') as outfile:
         json.dump(index_to_installation_dict, outfile, indent=4)
 
@@ -468,13 +463,6 @@ def process_zeros_for_month(month, data_arrays):
     print('Average zeros:', int(sum(zeros_count_list) / len(zeros_count_list)) if zeros_count_list else 0)
     print('Consumers to process:', len(consumers_indexes_to_process))
 
-    # Create a histogram of the number of zeros
-    # plt.hist(zeros_count_list, bins=range(1, max(zeros_count_list) + 2), edgecolor='black')
-    # plt.xlabel('Number of Zeros')
-    # plt.ylabel('Frequency')
-    # plt.title(f'Histogram of Number of Zeros per Dataset for {month}')
-    # plt.show()
-
     return month_data_arrays, consumers_indexes_to_process
 
 
@@ -513,9 +501,7 @@ def process_timeseries(batch, month_data_arrays, month, months_dict,
             weekdays_indexes = weekdays_index_dict[index_weekdays]
             hours_indexes = hours_index_dict[index_hours]
 
-            # Rule 1 - Average consumption for the same hour, on the same day of the week, within the same month
-            # potential_indexes = month_indexes.intersection(weekdays_indexes, hours_indexes)
-            # Rule 2 - Average consumption for the same hour, on the same day of the week, across any of the available months
+            # Average consumption for the same hour, on the same day of the week, across any of the available months
             potential_indexes = weekdays_indexes.intersection(hours_indexes)
 
             list_to_average = []
@@ -795,9 +781,6 @@ def create_north_area_consolidated_df():
         (df['local_x'] >= long_left) & 
         (df['local_x'] <= long_right)
     ]
-
-    # print(len(df))
-    # print(len(df_north))
 
     df_north.to_csv('data/consolidated/enel_north_march_income_iicc_ene.csv', index=False)
     
